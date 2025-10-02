@@ -4,54 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekapitulasi SKP ASN Kab. Sampang 2024</title>
-    <!-- Memuat Tailwind CSS untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Memuat library SheetJS untuk membaca file Excel/CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Style untuk container tabel agar bisa scroll dan header tetap di atas */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Latar belakang abu-abu muda */
+        }
         .table-container {
             max-height: 60vh;
             overflow-y: auto;
-            position: relative;
         }
-        thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        /* Custom scrollbar */
+        /* Custom scrollbar for better aesthetics */
         .table-container::-webkit-scrollbar {
             width: 8px;
-            height: 8px;
         }
         .table-container::-webkit-scrollbar-track {
             background: #f1f1f1;
+            border-radius: 10px;
         }
         .table-container::-webkit-scrollbar-thumb {
             background: #888;
-            border-radius: 4px;
+            border-radius: 10px;
         }
         .table-container::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        /* Style untuk input di mode edit agar lebih jelas */
-        td input:not([readonly]) {
-            background-color: #f0f8ff; /* AliceBlue */
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f9fafb; /* Latar header tabel */
+            z-index: 10;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
+<body class="antialiased text-gray-800">
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- Navigasi Menu -->
-        <nav class="bg-white rounded-lg shadow-md mb-6">
-            <div class="flex justify-center p-2 space-x-2">
-                <button id="mainViewBtn" class="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white">Halaman Utama</button>
-                <button id="adminViewBtn" class="px-4 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-200">Menu Admin</button>
+    <div id="app" class="container mx-auto p-4 sm:p-6 max-w-7xl">
+        <!-- Notifikasi -->
+        <div id="notification" class="hidden fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50">
+            <p>Notifikasi</p>
+        </div>
+
+        <!-- Modal Kata Sandi -->
+        <div id="passwordModal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal-backdrop">
+            <div class="modal bg-white rounded-lg shadow-xl w-full max-w-sm p-6" style="transform: scale(0.95); opacity: 0;">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Akses Terbatas</h3>
+                <p class="text-gray-600 mb-4">Silakan masukkan kata sandi untuk mengakses menu admin.</p>
+                <input type="password" id="passwordInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kata Sandi">
+                <p id="passwordError" class="text-red-500 text-sm mt-2 hidden">Kata sandi salah. Silakan coba lagi.</p>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="cancelPassword" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Batal</button>
+                    <button id="submitPassword" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Masuk</button>
+                </div>
             </div>
-        </nav>
+        </div>
 
+        <!-- Header dan Navigasi -->
+        <header class="bg-white p-4 rounded-lg shadow-md mb-6">
+            <nav class="flex items-center justify-between">
+                <div class="text-lg font-bold text-gray-700">
+                    Menu Aplikasi
+                </div>
+                <div class="flex space-x-2">
+                    <button id="mainViewBtn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm">Halaman Utama</button>
+                    <button id="adminViewBtn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Menu Admin</button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Konten Utama -->
         <main class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
             <!-- Konten Halaman Utama (Tampilan Data) -->
             <div id="mainView">
@@ -61,178 +90,142 @@
                     <p class="text-sm text-gray-500 mt-4">Rekapitulasi ini berdasarkan hasil respon formulir di <a href="https://s.id/lapor-skp" target="_blank" class="text-blue-600 hover:underline font-bold">https://s.id/lapor-skp</a>.</p>
                     <p class="text-sm text-gray-500 mt-1">Bagi Bapak/Ibu ASN guru jika SKP Tahun 2024 masih belum muncul di SIMPEG disilakan mengisi link di atas. Jika sudah mengisi link dan ternyata pada kolom status SKP sudah dinyatakan 'Sudah Muncul' namun saat dicek di aplikasi SIMPEG masih "belum muncul", silahkan konfirmasi kembali dengan cara mengisi kembali link form di atas.</p>
                 </div>
+                 <!-- Kolom Pencarian -->
+                <div class="mb-4">
+                    <input type="text" id="searchInput" placeholder="Cari data di sini (NIP, Nama, Unit Kerja, dll)..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
                 <div class="table-container rounded-lg border border-gray-200">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 sticky top-0">
-                            <tr id="dataTableHeader">
-                                <!-- Header akan diisi oleh JavaScript -->
-                            </tr>
+                        <thead id="dataTableHeader">
+                            <!-- Header akan di-render oleh JavaScript -->
                         </thead>
                         <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Data akan diisi oleh JavaScript -->
+                            <!-- Data akan di-render oleh JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Konten Halaman Admin (Import & Edit Data) -->
+            <!-- Konten Halaman Admin -->
             <div id="adminView" class="hidden">
-                <h2 class="text-2xl font-bold text-gray-700 mb-4">Panel Admin</h2>
-                
-                <!-- Bagian Import File -->
-                <div class="mb-8 p-4 border rounded-lg bg-gray-50">
-                    <h3 class="text-lg font-semibold mb-2">Import Data dari File</h3>
-                     <div id="drop_zone" class="flex justify-center items-center w-full px-6 py-10 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-100">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <p class="mt-1 text-sm text-gray-600">
-                                <span class="font-medium text-blue-600">Klik untuk upload</span> atau seret file ke sini
-                            </p>
-                            <p class="text-xs text-gray-500">XLSX, XLS, atau CSV</p>
-                        </div>
-                    </div>
-                    <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv">
-                    <button id="processBtn" class="w-full mt-4 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 disabled:bg-gray-400" disabled>Proses & Simpan Data</button>
+                <h2 class="text-2xl font-bold text-gray-700 mb-4">Menu Kelola Data SKP</h2>
+                <!-- Area Impor File -->
+                <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 mb-6 text-center">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Impor Data dari Excel/CSV</h3>
+                    <p class="text-sm text-gray-500 mb-4">Pilih file untuk mengimpor atau memperbarui seluruh data.</p>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="block w-full max-w-xs mx-auto text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <button id="processButton" class="mt-4 px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400" disabled>Proses & Simpan Data</button>
                 </div>
-                
-                <!-- Bagian Edit Data Langsung -->
-                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-2">Edit Data Langsung</h3>
-                     <p class="text-sm text-gray-500 mb-3">Klik tombol "Edit" untuk mengubah data, "Simpan" untuk menyimpan, atau "Batal" untuk membatalkan. Klik "Tambah Data" untuk membuat baris baru.</p>
-                </div>
-                 <button id="addRowBtn" class="mb-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">Tambah Data Baru</button>
 
-                <div class="table-container rounded-lg border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                             <tr id="adminTableHeader">
-                                <!-- Admin header akan diisi oleh JavaScript -->
-                            </tr>
-                        </thead>
-                        <tbody id="adminTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Admin data akan diisi oleh JavaScript -->
-                        </tbody>
-                    </table>
+                <!-- Area Kelola Data Manual -->
+                <div class="mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">Edit Data Secara Manual</h3>
+                        <button id="addRowBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">+ Tambah Data</button>
+                    </div>
+                    <div class="table-container rounded-lg border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead id="adminTableHeader">
+                                <!-- Header Admin akan di-render oleh JavaScript -->
+                            </thead>
+                            <tbody id="adminTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Data Admin akan di-render oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
-    </div>
-
-    <!-- Modal Password -->
-    <div id="passwordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Akses Terbatas</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500 mb-4">Silakan masukkan kata sandi untuk mengakses menu admin.</p>
-                    <input type="password" id="passwordInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kata Sandi">
-                    <p id="passwordError" class="text-red-500 text-xs mt-1 h-4"></p>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <button id="submitPassword" class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Masuk</button>
-                    <button id="closeModal" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">Batal</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Notifikasi -->
-    <div id="notificationModal" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform translate-y-20 opacity-0 z-50">
-        <p id="notificationMessage"></p>
+        
+        <!-- Footer -->
+        <footer class="text-center mt-8 text-sm text-gray-500">
+            <p>&copy; 2024 | Dikembangkan oleh Yoyon Sugiyono, S.Pd., M.Pd., Gr.</p>
+            <p>UPTD SDN Margantoko 2, Kabupaten Sampang</p>
+        </footer>
     </div>
 
     <script>
-        // DOM Elements
+        document.addEventListener('DOMContentLoaded', () => {
+        // Elemen UI
         const mainView = document.getElementById('mainView');
         const adminView = document.getElementById('adminView');
         const mainViewBtn = document.getElementById('mainViewBtn');
         const adminViewBtn = document.getElementById('adminViewBtn');
-        
-        const dropZone = document.getElementById('drop_zone');
         const fileInput = document.getElementById('fileInput');
-        const processBtn = document.getElementById('processBtn');
-        
+        const processButton = document.getElementById('processButton');
         const passwordModal = document.getElementById('passwordModal');
         const passwordInput = document.getElementById('passwordInput');
         const passwordError = document.getElementById('passwordError');
-        const submitPasswordBtn = document.getElementById('submitPassword');
-        const closeModalBtn = document.getElementById('closeModal');
-
-        const notificationModal = document.getElementById('notificationModal');
-        const notificationMessage = document.getElementById('notificationMessage');
-
+        const submitPassword = document.getElementById('submitPassword');
+        const cancelPassword = document.getElementById('cancelPassword');
+        const notification = document.getElementById('notification');
         const addRowBtn = document.getElementById('addRowBtn');
+        const searchInput = document.getElementById('searchInput');
+        const dataTableBody = document.getElementById('dataTableBody');
         const adminTableBody = document.getElementById('adminTableBody');
 
         // State
         let currentData = [];
-        let headers = ['NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
+        let headers = ['No.', 'NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
         const ADMIN_PASSWORD = 'firdy@2930'; // Ganti kata sandi ini sesuai kebutuhan
 
         // Functions
         function showNotification(message, isError = false) {
-            notificationMessage.textContent = message;
-            notificationModal.classList.toggle('bg-green-500', !isError);
-            notificationModal.classList.toggle('bg-red-500', isError);
-            notificationModal.classList.remove('opacity-0', 'translate-y-20');
-            notificationModal.classList.add('opacity-100', 'translate-y-0');
-
+            notification.textContent = message;
+            notification.classList.remove('hidden');
+            notification.classList.toggle('bg-red-500', isError);
+            notification.classList.toggle('bg-green-500', !isError);
             setTimeout(() => {
-                notificationModal.classList.remove('opacity-100', 'translate-y-0');
-                notificationModal.classList.add('opacity-0', 'translate-y-20');
+                notification.classList.add('hidden');
             }, 3000);
         }
 
-        function switchView(viewName) {
-            if (viewName === 'admin') {
+        function switchView(view) {
+            if (view === 'admin') {
                 mainView.classList.add('hidden');
                 adminView.classList.remove('hidden');
-                mainViewBtn.classList.remove('bg-blue-600', 'text-white');
-                mainViewBtn.classList.add('text-gray-600', 'hover:bg-gray-200');
-                adminViewBtn.classList.add('bg-blue-600', 'text-white');
-                adminViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-200');
-            } else { // 'main'
+                adminViewBtn.classList.replace('bg-gray-200', 'bg-blue-600');
+                adminViewBtn.classList.replace('text-gray-700', 'text-white');
+                mainViewBtn.classList.replace('bg-blue-600', 'bg-gray-200');
+                mainViewBtn.classList.replace('text-white', 'text-gray-700');
+            } else {
                 adminView.classList.add('hidden');
                 mainView.classList.remove('hidden');
-                adminViewBtn.classList.remove('bg-blue-600', 'text-white');
-                adminViewBtn.classList.add('text-gray-600', 'hover:bg-gray-200');
-                mainViewBtn.classList.add('bg-blue-600', 'text-white');
-                mainViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                mainViewBtn.classList.replace('bg-gray-200', 'bg-blue-600');
+                mainViewBtn.classList.replace('text-gray-700', 'text-white');
+                adminViewBtn.classList.replace('bg-blue-600', 'bg-gray-200');
+                adminViewBtn.classList.replace('text-white', 'text-gray-700');
             }
-        }
-
-        function loadDataFromStorage() {
-            const storedData = sessionStorage.getItem('skpData');
-            if (storedData) {
-                currentData = JSON.parse(storedData);
-            }
-            renderAllTables();
-        }
-        
-        function saveDataToStorage() {
-            sessionStorage.setItem('skpData', JSON.stringify(currentData));
         }
 
         function renderHeaders() {
-            const dataHeader = document.getElementById('dataTableHeader');
-            const adminHeader = document.getElementById('adminTableHeader');
+            const headerRow = (h) => `<tr>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}</tr>`;
+            const adminHeaderRow = (h) => `<tr>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}<th scope="col" class="relative px-4 py-3"><span class="sr-only">Aksi</span></th></tr>`;
             
-            dataHeader.innerHTML = headers.map(h => `<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${h}</th>`).join('');
-            adminHeader.innerHTML = headers.map(h => `<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${h}</th>`).join('') + `<th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>`;
+            document.getElementById('dataTableHeader').innerHTML = headerRow(headers);
+            document.getElementById('adminTableHeader').innerHTML = adminHeaderRow(headers);
+        }
+
+        function filterAndRender(searchTerm = '') {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            const filteredData = currentData.filter(row => 
+                Object.values(row).some(value => 
+                    String(value).toLowerCase().includes(lowerCaseSearchTerm)
+                )
+            );
+            renderData(filteredData);
         }
 
         function renderData(data) {
-            const tableBody = document.getElementById('dataTableBody');
-            if (!tableBody) return;
+            if (!dataTableBody) return;
 
             if (data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="text-center py-10 text-gray-500">Tidak ada data untuk ditampilkan.</td></tr>`;
+                dataTableBody.innerHTML = `<tr><td colspan="${headers.length}" class="text-center py-10 text-gray-500">Tidak ada data untuk ditampilkan.</td></tr>`;
                 return;
             }
 
-            const tableRows = data.map(row => {
+            const tableRows = data.map((row) => {
+                const originalIndex = currentData.findIndex(originalRow => originalRow === row);
                 const status = (row['Status SKP di SIMPEG'] || '').trim().toLowerCase();
                 const rowClass = status.includes('tidak') || status.includes('belum') 
                     ? 'bg-red-100 text-red-800 font-medium' 
@@ -240,15 +233,15 @@
                 
                 return `
                 <tr class="${rowClass}">
-                    ${headers.map(header => `<td class="px-4 py-3 text-sm whitespace-nowrap">${row[header] || ''}</td>`).join('')}
+                    <td class="px-4 py-3 text-sm whitespace-nowrap text-center">${originalIndex + 1}</td>
+                    ${headers.slice(1).map(header => `<td class="px-4 py-3 text-sm whitespace-nowrap">${row[header] || ''}</td>`).join('')}
                 </tr>
                 `
             }).join('');
-            tableBody.innerHTML = tableRows;
+            dataTableBody.innerHTML = tableRows;
         }
         
         function renderAdminTable(data) {
-            const adminTableBody = document.getElementById('adminTableBody');
             if (!adminTableBody) return;
 
             if (data.length === 0) {
@@ -264,7 +257,8 @@
 
                 return `
                 <tr class="${rowClass}" data-index="${index}">
-                    ${headers.map(header => `
+                    <td class="px-4 py-3 text-sm whitespace-nowrap text-center">${index + 1}</td>
+                    ${headers.slice(1).map(header => `
                         <td class="px-4 py-3 text-sm whitespace-nowrap">
                             <input type="text" name="${header}" value="${row[header] || ''}" class="w-full bg-transparent border-none p-1 rounded focus:ring-2 focus:ring-blue-500" readonly>
                         </td>
@@ -280,120 +274,105 @@
         }
         
         function renderAllTables() {
-            renderData(currentData);
+            filterAndRender(searchInput.value);
             renderAdminTable(currentData);
         }
-        
+
         function saveDataAndRender() {
-            saveDataToStorage();
+            sessionStorage.setItem('skpData', JSON.stringify(currentData));
+            sessionStorage.setItem('skpHeaders', JSON.stringify(headers));
             renderAllTables();
-        }
-
-        function handleFile(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-                    header: 1,
-                    // raw: false, // Menjaga format tanggal tetap string
-                    // dateNF: 'yyyy-mm-dd' // Contoh format jika ada tanggal
-                });
-
-                if (jsonData.length > 1) {
-                    headers = jsonData[0].map(h => h.trim()); // Ambil header dari file
-                    currentData = jsonData.slice(1).map(row => {
-                        let rowData = {};
-                        headers.forEach((header, index) => {
-                            rowData[header] = row[index] || '';
-                        });
-                        return rowData;
-                    });
-                    renderHeaders(); // Render ulang header jika berubah
-                    saveDataAndRender();
-                    showNotification('Data berhasil diimpor dan disimpan!');
-                    switchView('main'); // Otomatis kembali ke halaman utama
-                } else {
-                    showNotification('File kosong atau format tidak sesuai.', true);
-                }
-            };
-            reader.onerror = () => {
-                showNotification('Gagal membaca file.', true);
-            };
-            reader.readAsArrayBuffer(file);
         }
 
         // Event Listeners
         mainViewBtn.addEventListener('click', () => switchView('main'));
         adminViewBtn.addEventListener('click', () => {
             passwordModal.classList.remove('hidden');
-            passwordInput.focus();
+            setTimeout(() => {
+                passwordModal.querySelector('.modal').style.transform = 'scale(1)';
+                passwordModal.querySelector('.modal').style.opacity = '1';
+                passwordInput.focus();
+            }, 10);
         });
 
-        // Password Modal Logic
-        submitPasswordBtn.addEventListener('click', () => {
-            if (passwordInput.value === ADMIN_PASSWORD) {
+        cancelPassword.addEventListener('click', () => {
+            passwordModal.querySelector('.modal').style.transform = 'scale(0.95)';
+            passwordModal.querySelector('.modal').style.opacity = '0';
+            setTimeout(() => {
                 passwordModal.classList.add('hidden');
                 passwordInput.value = '';
-                passwordError.textContent = '';
+                passwordError.classList.add('hidden');
+            }, 300);
+        });
+
+        submitPassword.addEventListener('click', () => {
+            if (passwordInput.value === ADMIN_PASSWORD) {
+                cancelPassword.click();
                 switchView('admin');
             } else {
-                passwordError.textContent = 'Kata sandi salah.';
+                passwordError.classList.remove('hidden');
+                passwordInput.select();
             }
         });
-        closeModalBtn.addEventListener('click', () => {
-            passwordModal.classList.add('hidden');
-            passwordInput.value = '';
-            passwordError.textContent = '';
-        });
-        passwordInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') submitPasswordBtn.click();
+
+        passwordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitPassword.click();
         });
 
-
-        // File Drop Zone Logic
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.add('bg-blue-50');
-        });
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('bg-blue-50');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('bg-blue-50');
-            const files = e.dataTransfer.files;
-            if (files.length) {
-                fileInput.files = files;
-                processBtn.disabled = false;
-            }
-        });
-        dropZone.addEventListener('click', () => {
-            fileInput.click();
-        });
         fileInput.addEventListener('change', () => {
-            processBtn.disabled = !fileInput.files.length;
-        });
-        processBtn.addEventListener('click', () => {
-            if (fileInput.files.length) {
-                handleFile(fileInput.files[0]);
-            }
+            processButton.disabled = !fileInput.files.length;
         });
 
-        // Admin Table Actions
+        processButton.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { 
+                    header: 1,
+                    defval: '' // Ganti sel kosong dengan string kosong
+                });
+
+                if (jsonData.length > 1) {
+                    const fileHeaders = jsonData[0].map(h => String(h).trim());
+                    headers = ['No.', ...fileHeaders];
+                    
+                    currentData = jsonData.slice(1).map(row => {
+                        let rowData = {};
+                        fileHeaders.forEach((header, index) => {
+                            rowData[header] = row[index] || '';
+                        });
+                        return rowData;
+                    });
+
+                    renderHeaders();
+                    saveDataAndRender();
+                    showNotification('Data berhasil diimpor dan disimpan!');
+                    switchView('main');
+                } else {
+                    showNotification('File kosong atau format tidak sesuai.', true);
+                }
+            };
+            reader.onerror = () => showNotification('Gagal membaca file.', true);
+            reader.readAsArrayBuffer(file);
+        });
+        
+        searchInput.addEventListener('input', (e) => {
+            filterAndRender(e.target.value);
+        });
+
         addRowBtn.addEventListener('click', () => {
             const newRow = document.createElement('tr');
-            newRow.dataset.index = -1; // Tandai sebagai baris baru
+            newRow.dataset.index = -1;
             newRow.classList.add('bg-green-50');
             
             newRow.innerHTML = `
-                ${headers.map(header => `
+                <td class="px-4 py-3 text-sm whitespace-nowrap text-center font-bold">*</td>
+                ${headers.slice(1).map(header => `
                     <td class="px-4 py-3 text-sm whitespace-nowrap">
                         <input type="text" name="${header}" value="" placeholder="${header}" class="w-full bg-white border border-gray-300 p-1 rounded focus:ring-2 focus:ring-blue-500" >
                     </td>
@@ -403,38 +382,31 @@
                     <button class="cancel-btn text-gray-600 hover:text-gray-800 ml-2">Batal</button>
                 </td>
             `;
-            adminTableBody.prepend(newRow); // Tambahkan di paling atas
+            adminTableBody.prepend(newRow);
+            newRow.querySelector('input').focus();
         });
 
         adminTableBody.addEventListener('click', (e) => {
-            const tr = e.target.closest('tr');
-            if (!tr) return;
+            const row = e.target.closest('tr');
+            if (!row) return;
+            const index = parseInt(row.dataset.index);
 
-            const index = parseInt(tr.dataset.index);
-
-            // Handle Batal
-            if (e.target.classList.contains('cancel-btn')) {
-                if (index === -1) { // Jika membatalkan baris baru
-                    tr.remove();
-                } else { // Jika membatalkan edit
-                    renderAdminTable(currentData); // Render ulang tabel untuk mengembalikan state
-                }
-            }
-
-            // Handle Edit
             if (e.target.classList.contains('edit-btn')) {
-                tr.querySelectorAll('input').forEach(input => input.readOnly = false);
+                row.querySelectorAll('input').forEach(input => input.readOnly = false);
                 e.target.textContent = 'Simpan';
                 e.target.classList.remove('edit-btn', 'text-blue-600', 'hover:text-blue-800');
-                e.target.classList.add('save-btn', 'text-green-600', 'hover:text-green-800');
-                
-                const deleteBtn = tr.querySelector('.delete-btn');
-                deleteBtn.textContent = 'Batal';
-                deleteBtn.classList.remove('delete-btn', 'text-red-600', 'hover:text-red-800');
-                deleteBtn.classList.add('cancel-btn', 'text-gray-600', 'hover:text-gray-800');
+                e.target.classList.add('save-edit-btn', 'text-green-600', 'hover:text-green-800');
+                row.querySelector('input').focus();
+            } 
+            else if (e.target.classList.contains('save-edit-btn')) {
+                const updatedRowData = {};
+                row.querySelectorAll('input[name]').forEach(input => {
+                    updatedRowData[input.name] = input.value;
+                });
+                currentData[index] = updatedRowData;
+                saveDataAndRender();
+                showNotification('Data berhasil diperbarui.');
             }
-            
-            // Handle Hapus
             else if (e.target.classList.contains('delete-btn')) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     currentData.splice(index, 1);
@@ -442,34 +414,37 @@
                     showNotification('Data berhasil dihapus.');
                 }
             }
-
-            // Handle Simpan
-            else if (e.target.classList.contains('save-btn')) {
-                const inputs = tr.querySelectorAll('input');
+            else if (e.target.classList.contains('save-btn')) { // Untuk baris baru
                 const newRowData = {};
-                inputs.forEach(input => { newRowData[input.name] = input.value; });
-
-                if (index == -1) { // Jika ini baris baru
-                    currentData.unshift(newRowData); // Tambahkan ke awal array
-                } else { // Jika mengedit baris yang ada
-                    currentData[index] = newRowData;
-                }
+                let isValid = true;
+                row.querySelectorAll('input[name]').forEach(input => {
+                    newRowData[input.name] = input.value;
+                });
+                currentData.unshift(newRowData);
                 saveDataAndRender();
+                showNotification('Data baru berhasil ditambahkan.');
+            }
+            else if (e.target.classList.contains('cancel-btn')) { // Untuk baris baru
+                row.remove();
             }
         });
 
-        // Initial Load
-        document.addEventListener('DOMContentLoaded', () => {
+        // Inisialisasi
+        function initialize() {
+            const savedData = sessionStorage.getItem('skpData');
+            const savedHeaders = sessionStorage.getItem('skpHeaders');
+            if (savedData) {
+                currentData = JSON.parse(savedData);
+                if (savedHeaders) {
+                    headers = JSON.parse(savedHeaders);
+                }
+            }
             renderHeaders();
-            loadDataFromStorage();
-        });
+            renderAllTables();
+        }
+
+        initialize();
+    });
     </script>
-
-    <footer class="text-center p-4 mt-4">
-        <p class="text-xs text-gray-500">
-            Aplikasi ini dikembangkan oleh Yoyon Sugiyono, S.Pd., M.Pd., Gr. guru di UPTD SDN Margantoko 2
-        </p>
-    </footer>
-
 </body>
 </html>
