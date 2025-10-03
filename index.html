@@ -3,45 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekapitulasi Status SKP ASN Guru Kab. Sampang Tahun 2024 di SIMPEG</title>
+    <title>Rekapitulasi SKP Tahun 2024 ASN Guru Kab. Sampang di SIMPEG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Latar belakang abu-abu muda */
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .table-container { max-height: 60vh; overflow-y: auto; }
+        .table-container::-webkit-scrollbar { width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .table-container::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #555; }
+        thead th { position: sticky; top: 0; background-color: #f9fafb; z-index: 10; }
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
+        .modal { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
         }
-        .table-container {
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        /* Custom scrollbar for better aesthetics */
-        .table-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        thead th {
-            position: sticky;
-            top: 0;
-            background-color: #f9fafb; /* Latar header tabel */
-            z-index: 10;
-        }
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .modal {
-            transition: opacity 0.3s ease, transform 0.3s ease;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -53,7 +40,7 @@
             <p>Notifikasi</p>
         </div>
 
-        <!-- Modal Kata Sandi -->
+        <!-- Modal Kata Sandi (Tidak ada perubahan) -->
         <div id="passwordModal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal-backdrop">
             <div class="modal bg-white rounded-lg shadow-xl w-full max-w-sm p-6" style="transform: scale(0.95); opacity: 0;">
                 <h3 class="text-xl font-semibold mb-4 text-gray-700">Akses Terbatas</h3>
@@ -67,9 +54,9 @@
             </div>
         </div>
 
-        <!-- Header dan Navigasi -->
+        <!-- Header dan Navigasi (Tidak ada perubahan) -->
         <header class="bg-white p-4 rounded-lg shadow-md mb-6">
-            <nav class="flex items-center justify-between">
+             <nav class="flex items-center justify-between">
                 <div class="text-lg font-bold text-gray-700">
                     Menu Aplikasi
                 </div>
@@ -81,26 +68,23 @@
         </header>
 
         <!-- Konten Utama -->
-        <main class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-            <!-- Konten Halaman Utama (Tampilan Data) -->
+        <main class="bg-white p-4 sm:p-6 rounded-lg shadow-md min-h-[70vh]">
+            <!-- Konten Halaman Utama -->
             <div id="mainView">
                 <div class="text-center mb-6">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Rekapitulasi Status SKP ASN Guru Kab. Sampang Tahun 2024 di SIMPEG</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Rekapitulasi SKP Tahun 2024 ASN Guru Kab. Sampang di SIMPEG</h1>
                     <p class="text-lg text-gray-600 mt-1">Kabupaten Sampang</p>
                     <p class="text-sm text-gray-500 mt-4">Rekapitulasi ini berdasarkan hasil respon formulir di <a href="https://s.id/lapor-skp" target="_blank" class="text-blue-600 hover:underline font-bold">https://s.id/lapor-skp</a>.</p>
                     <p class="text-sm text-gray-500 mt-1">Bagi Bapak/Ibu ASN guru jika SKP Tahun 2024 masih belum muncul di SIMPEG disilakan mengisi link di atas. Jika sudah mengisi link dan ternyata pada kolom status SKP sudah dinyatakan 'Sudah Muncul' namun saat dicek di aplikasi SIMPEG masih "belum muncul", silahkan konfirmasi kembali dengan cara mengisi kembali link form di atas.</p>
                 </div>
-                 <!-- Kolom Pencarian -->
                 <div class="mb-4">
                     <input type="text" id="searchInput" placeholder="Cari data di sini (NIP, Nama, Unit Kerja, dll)..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="table-container rounded-lg border border-gray-200">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead id="dataTableHeader">
-                            <!-- Header akan di-render oleh JavaScript -->
-                        </thead>
+                        <thead id="dataTableHeader"></thead>
                         <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
-                            <!-- Data akan di-render oleh JavaScript -->
+                           <tr><td colspan="6" class="text-center py-10"><div class="loader mx-auto"></div><p class="mt-2 text-gray-500">Memuat data...</p></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -109,15 +93,13 @@
             <!-- Konten Halaman Admin -->
             <div id="adminView" class="hidden">
                 <h2 class="text-2xl font-bold text-gray-700 mb-4">Menu Kelola Data SKP</h2>
-                <!-- Area Impor File -->
                 <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 mb-6 text-center">
                     <h3 class="text-lg font-semibold text-gray-700 mb-2">Impor Data dari Excel/CSV</h3>
-                    <p class="text-sm text-gray-500 mb-4">Pilih file untuk mengimpor atau memperbarui seluruh data.</p>
+                    <p class="text-sm text-gray-500 mb-4">Pilih file untuk **MENGGANTI** seluruh data yang ada.</p>
                     <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="block w-full max-w-xs mx-auto text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    <button id="processButton" class="mt-4 px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400" disabled>Proses & Simpan Data</button>
+                    <button id="processButton" class="mt-4 px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400" disabled>Proses & Ganti Data</button>
                 </div>
 
-                <!-- Area Kelola Data Manual -->
                 <div class="mt-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-700">Edit Data Secara Manual</h3>
@@ -125,11 +107,9 @@
                     </div>
                     <div class="table-container rounded-lg border border-gray-200">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead id="adminTableHeader">
-                                <!-- Header Admin akan di-render oleh JavaScript -->
-                            </thead>
+                            <thead id="adminTableHeader"></thead>
                             <tbody id="adminTableBody" class="bg-white divide-y divide-gray-200">
-                                <!-- Data Admin akan di-render oleh JavaScript -->
+                                <tr><td colspan="7" class="text-center py-10"><div class="loader mx-auto"></div><p class="mt-2 text-gray-500">Memuat data...</p></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -144,9 +124,30 @@
         </footer>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-        // Elemen UI
+    <script type="module">
+        // === PERUBAHAN: Semua kode JavaScript digabung di sini ===
+
+        // 1. Impor fungsi yang kita butuhkan dari Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, setDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // 2. Tempat untuk Konfigurasi Firebase Anda
+        const firebaseConfig = {
+  apiKey: "AIzaSyBeLLP1N7heUvLUJuD6oXcQEpmI-mMaPes",
+  authDomain: "rekap-skp-sampang.firebaseapp.com",
+  projectId: "rekap-skp-sampang",
+  storageBucket: "rekap-skp-sampang.firebasestorage.app",
+  messagingSenderId: "10311895351",
+  appId: "1:10311895351:web:8dbaa535d011c4931c32b2"
+};
+
+        // 3. Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 4. Kode aplikasi utama berjalan langsung
+        const dataCollection = collection(db, 'skp-data');
+
         const mainView = document.getElementById('mainView');
         const adminView = document.getElementById('adminView');
         const mainViewBtn = document.getElementById('mainViewBtn');
@@ -164,12 +165,10 @@
         const dataTableBody = document.getElementById('dataTableBody');
         const adminTableBody = document.getElementById('adminTableBody');
 
-        // State
         let currentData = [];
         let headers = ['No.', 'NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
-        const ADMIN_PASSWORD = 'firdy@2930'; // Ganti kata sandi ini sesuai kebutuhan
+        const ADMIN_PASSWORD = 'firdy@2930';
 
-        // Functions
         function showNotification(message, isError = false) {
             notification.textContent = message;
             notification.classList.remove('hidden');
@@ -199,17 +198,18 @@
         }
 
         function renderHeaders() {
-            const headerRow = (h) => `<tr>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}</tr>`;
-            const adminHeaderRow = (h) => `<tr>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}<th scope="col" class="relative px-4 py-3"><span class="sr-only">Aksi</span></th></tr>`;
+            const headerRow = (h) => `<tr><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No.</th>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}</tr>`;
+            const adminHeaderRow = (h) => `<tr><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No.</th>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}<th scope="col" class="relative px-4 py-3"><span class="sr-only">Aksi</span></th></tr>`;
             
-            document.getElementById('dataTableHeader').innerHTML = headerRow(headers);
-            document.getElementById('adminTableHeader').innerHTML = adminHeaderRow(headers);
+            const displayHeaders = headers.slice(1); // Menghilangkan 'No.' dari array utama
+            document.getElementById('dataTableHeader').innerHTML = headerRow(displayHeaders);
+            document.getElementById('adminTableHeader').innerHTML = adminHeaderRow(displayHeaders);
         }
 
         function filterAndRender(searchTerm = '') {
             const lowerCaseSearchTerm = searchTerm.toLowerCase();
             const filteredData = currentData.filter(row => 
-                Object.values(row).some(value => 
+                Object.values(row.data).some(value => 
                     String(value).toLowerCase().includes(lowerCaseSearchTerm)
                 )
             );
@@ -218,57 +218,40 @@
 
         function renderData(data) {
             if (!dataTableBody) return;
-
             if (data.length === 0) {
                 dataTableBody.innerHTML = `<tr><td colspan="${headers.length}" class="text-center py-10 text-gray-500">Tidak ada data untuk ditampilkan.</td></tr>`;
                 return;
             }
-
-            const tableRows = data.map((row) => {
-                const originalIndex = currentData.findIndex(originalRow => originalRow === row);
-                const status = (row['Status SKP di SIMPEG'] || '').trim().toLowerCase();
-                const rowClass = status.includes('tidak') || status.includes('belum') 
-                    ? 'bg-red-100 text-red-800 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-50';
-                
-                return `
-                <tr class="${rowClass}">
-                    <td class="px-4 py-3 text-sm whitespace-nowrap text-center">${originalIndex + 1}</td>
-                    ${headers.slice(1).map(header => `<td class="px-4 py-3 text-sm whitespace-nowrap">${row[header] || ''}</td>`).join('')}
-                </tr>
-                `
+            const displayHeaders = headers.slice(1);
+            const tableRows = data.map((row, index) => {
+                const status = (row.data['Status SKP di SIMPEG'] || '').trim().toLowerCase();
+                const rowClass = status.includes('tidak') || status.includes('belum') ? 'bg-red-100 text-red-800 font-medium' : 'text-gray-600 hover:bg-gray-50';
+                return `<tr class="${rowClass}">
+                    <td class="px-4 py-3 text-sm whitespace-nowrap text-center">${index + 1}</td>
+                    ${displayHeaders.map(header => `<td class="px-4 py-3 text-sm whitespace-nowrap">${row.data[header] || ''}</td>`).join('')}
+                </tr>`;
             }).join('');
             dataTableBody.innerHTML = tableRows;
         }
         
         function renderAdminTable(data) {
             if (!adminTableBody) return;
-
             if (data.length === 0) {
-                adminTableBody.innerHTML = `<tr><td colspan="${headers.length + 1}" class="text-center py-10 text-gray-500">Tidak ada data. Tambahkan data baru atau impor dari file.</td></tr>`;
+                adminTableBody.innerHTML = `<tr><td colspan="${headers.length + 1}" class="text-center py-10 text-gray-500">Tidak ada data. Tambahkan atau impor.</td></tr>`;
                 return;
             }
-
+            const displayHeaders = headers.slice(1);
             const tableRows = data.map((row, index) => {
-                const status = (row['Status SKP di SIMPEG'] || '').trim().toLowerCase();
-                const rowClass = status.includes('tidak') || status.includes('belum') 
-                    ? 'bg-red-100 text-red-800 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-50';
-
-                return `
-                <tr class="${rowClass}" data-index="${index}">
+                const status = (row.data['Status SKP di SIMPEG'] || '').trim().toLowerCase();
+                const rowClass = status.includes('tidak') || status.includes('belum') ? 'bg-red-100 text-red-800 font-medium' : 'text-gray-600 hover:bg-gray-50';
+                return `<tr class="${rowClass}" data-id="${row.id}">
                     <td class="px-4 py-3 text-sm whitespace-nowrap text-center">${index + 1}</td>
-                    ${headers.slice(1).map(header => `
-                        <td class="px-4 py-3 text-sm whitespace-nowrap">
-                            <input type="text" name="${header}" value="${row[header] || ''}" class="w-full bg-transparent border-none p-1 rounded focus:ring-2 focus:ring-blue-500" readonly>
-                        </td>
-                    `).join('')}
+                    ${displayHeaders.map(header => `<td class="px-4 py-3 text-sm whitespace-nowrap"><input type="text" name="${header}" value="${row.data[header] || ''}" class="w-full bg-transparent border-none p-1 rounded focus:ring-2 focus:ring-blue-500" readonly></td>`).join('')}
                     <td class="px-4 py-3 text-sm whitespace-nowrap text-right">
                         <button class="edit-btn text-blue-600 hover:text-blue-800">Edit</button>
                         <button class="delete-btn text-red-600 hover:text-red-800 ml-2">Hapus</button>
                     </td>
-                </tr>
-                `
+                </tr>`;
             }).join('');
             adminTableBody.innerHTML = tableRows;
         }
@@ -278,13 +261,22 @@
             renderAdminTable(currentData);
         }
 
-        function saveDataAndRender() {
-            sessionStorage.setItem('skpData', JSON.stringify(currentData));
-            sessionStorage.setItem('skpHeaders', JSON.stringify(headers));
+        onSnapshot(dataCollection, (snapshot) => {
+            currentData = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+            currentData.sort((a, b) => (a.data['Nama ASN'] || '').localeCompare(b.data['Nama ASN'] || ''));
+            
+            if (currentData.length > 0) {
+               const firstItemHeaders = Object.keys(currentData[0].data);
+               const desiredOrder = ['NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
+               const sortedHeaders = desiredOrder.filter(h => firstItemHeaders.includes(h));
+               const otherHeaders = firstItemHeaders.filter(h => !desiredOrder.includes(h));
+               headers = ['No.', ...sortedHeaders, ...otherHeaders];
+            }
+            
+            renderHeaders();
             renderAllTables();
-        }
+        });
 
-        // Event Listeners
         mainViewBtn.addEventListener('click', () => switchView('main'));
         adminViewBtn.addEventListener('click', () => {
             passwordModal.classList.remove('hidden');
@@ -294,157 +286,122 @@
                 passwordInput.focus();
             }, 10);
         });
-
         cancelPassword.addEventListener('click', () => {
             passwordModal.querySelector('.modal').style.transform = 'scale(0.95)';
             passwordModal.querySelector('.modal').style.opacity = '0';
-            setTimeout(() => {
-                passwordModal.classList.add('hidden');
-                passwordInput.value = '';
-                passwordError.classList.add('hidden');
-            }, 300);
+            setTimeout(() => { passwordModal.classList.add('hidden'); passwordInput.value = ''; passwordError.classList.add('hidden'); }, 300);
         });
-
         submitPassword.addEventListener('click', () => {
-            if (passwordInput.value === ADMIN_PASSWORD) {
-                cancelPassword.click();
-                switchView('admin');
-            } else {
-                passwordError.classList.remove('hidden');
-                passwordInput.select();
+            if (passwordInput.value === ADMIN_PASSWORD) { cancelPassword.click(); switchView('admin'); } else { passwordError.classList.remove('hidden'); passwordInput.select(); }
+        });
+        passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitPassword.click(); });
+        fileInput.addEventListener('change', () => { processButton.disabled = !fileInput.files.length; });
+        
+        processButton.addEventListener('click', async () => {
+            if (!confirm('Anda yakin ingin MENGGANTI SEMUA data yang ada dengan data dari file ini? Aksi ini tidak bisa dibatalkan.')) {
+                return;
             }
-        });
-
-        passwordInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') submitPassword.click();
-        });
-
-        fileInput.addEventListener('change', () => {
-            processButton.disabled = !fileInput.files.length;
-        });
-
-        processButton.addEventListener('click', () => {
+            
             const file = fileInput.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { 
-                    header: 1,
-                    defval: '' // Ganti sel kosong dengan string kosong
-                });
+            processButton.disabled = true;
+            processButton.textContent = 'Memproses...';
 
-                if (jsonData.length > 1) {
-                    const fileHeaders = jsonData[0].map(h => String(h).trim());
-                    headers = ['No.', ...fileHeaders];
-                    
-                    currentData = jsonData.slice(1).map(row => {
-                        let rowData = {};
-                        fileHeaders.forEach((header, index) => {
-                            rowData[header] = row[index] || '';
+            try {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+
+                    if (jsonData.length > 0) {
+                        const batchDelete = writeBatch(db);
+                        currentData.forEach(docItem => {
+                            batchDelete.delete(doc(dataCollection, docItem.id));
                         });
-                        return rowData;
-                    });
+                        await batchDelete.commit();
 
-                    renderHeaders();
-                    saveDataAndRender();
-                    showNotification('Data berhasil diimpor dan disimpan!');
-                    switchView('main');
-                } else {
-                    showNotification('File kosong atau format tidak sesuai.', true);
-                }
-            };
-            reader.onerror = () => showNotification('Gagal membaca file.', true);
-            reader.readAsArrayBuffer(file);
+                        const batchAdd = writeBatch(db);
+                        jsonData.forEach(row => {
+                            const newDocRef = doc(dataCollection);
+                            batchAdd.set(newDocRef, row);
+                        });
+                        await batchAdd.commit();
+                        
+                        showNotification('Semua data berhasil diganti dengan data dari file!');
+                        switchView('main');
+                    } else {
+                        showNotification('File kosong atau format tidak sesuai.', true);
+                    }
+                };
+                reader.onerror = () => showNotification('Gagal membaca file.', true);
+                reader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error("Error processing file: ", error);
+                showNotification('Terjadi kesalahan saat memproses file.', true);
+            } finally {
+                processButton.disabled = false;
+                processButton.textContent = 'Proses & Ganti Data';
+                fileInput.value = '';
+            }
         });
         
-        searchInput.addEventListener('input', (e) => {
-            filterAndRender(e.target.value);
-        });
+        searchInput.addEventListener('input', (e) => filterAndRender(e.target.value));
 
         addRowBtn.addEventListener('click', () => {
-            const newRow = document.createElement('tr');
-            newRow.dataset.index = -1;
-            newRow.classList.add('bg-green-50');
-            
-            newRow.innerHTML = `
+             const newRow = document.createElement('tr');
+             newRow.classList.add('bg-green-50');
+             const displayHeaders = headers.slice(1);
+             newRow.innerHTML = `
                 <td class="px-4 py-3 text-sm whitespace-nowrap text-center font-bold">*</td>
-                ${headers.slice(1).map(header => `
-                    <td class="px-4 py-3 text-sm whitespace-nowrap">
-                        <input type="text" name="${header}" value="" placeholder="${header}" class="w-full bg-white border border-gray-300 p-1 rounded focus:ring-2 focus:ring-blue-500" >
-                    </td>
-                `).join('')}
+                ${displayHeaders.map(header => `<td class="px-4 py-3 text-sm whitespace-nowrap"><input type="text" name="${header}" value="" placeholder="${header}" class="w-full bg-white border border-gray-300 p-1 rounded focus:ring-2 focus:ring-blue-500"></td>`).join('')}
                 <td class="px-4 py-3 text-sm whitespace-nowrap text-right">
                     <button class="save-btn text-green-600 hover:text-green-800">Simpan</button>
                     <button class="cancel-btn text-gray-600 hover:text-gray-800 ml-2">Batal</button>
-                </td>
-            `;
-            adminTableBody.prepend(newRow);
-            newRow.querySelector('input').focus();
+                </td>`;
+             adminTableBody.prepend(newRow);
+             newRow.querySelector('input').focus();
         });
 
-        adminTableBody.addEventListener('click', (e) => {
+        adminTableBody.addEventListener('click', async (e) => {
             const row = e.target.closest('tr');
             if (!row) return;
-            const index = parseInt(row.dataset.index);
+            const docId = row.dataset.id;
 
             if (e.target.classList.contains('edit-btn')) {
                 row.querySelectorAll('input').forEach(input => input.readOnly = false);
                 e.target.textContent = 'Simpan';
-                e.target.classList.remove('edit-btn', 'text-blue-600', 'hover:text-blue-800');
-                e.target.classList.add('save-edit-btn', 'text-green-600', 'hover:text-green-800');
+                e.target.classList.remove('edit-btn'); e.target.classList.add('save-edit-btn', 'text-green-600');
                 row.querySelector('input').focus();
             } 
             else if (e.target.classList.contains('save-edit-btn')) {
                 const updatedRowData = {};
-                row.querySelectorAll('input[name]').forEach(input => {
-                    updatedRowData[input.name] = input.value;
-                });
-                currentData[index] = updatedRowData;
-                saveDataAndRender();
-                showNotification('Data berhasil diperbarui.');
+                row.querySelectorAll('input[name]').forEach(input => { updatedRowData[input.name] = input.value; });
+                try {
+                    await setDoc(doc(db, 'skp-data', docId), updatedRowData);
+                    showNotification('Data berhasil diperbarui.');
+                } catch (error) { showNotification('Gagal memperbarui data.', true); }
             }
             else if (e.target.classList.contains('delete-btn')) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                    currentData.splice(index, 1);
-                    saveDataAndRender();
-                    showNotification('Data berhasil dihapus.');
+                    try {
+                        await deleteDoc(doc(db, 'skp-data', docId));
+                        showNotification('Data berhasil dihapus.');
+                    } catch (error) { showNotification('Gagal menghapus data.', true); }
                 }
             }
             else if (e.target.classList.contains('save-btn')) { // Untuk baris baru
                 const newRowData = {};
-                let isValid = true;
-                row.querySelectorAll('input[name]').forEach(input => {
-                    newRowData[input.name] = input.value;
-                });
-                currentData.unshift(newRowData);
-                saveDataAndRender();
-                showNotification('Data baru berhasil ditambahkan.');
+                row.querySelectorAll('input[name]').forEach(input => { newRowData[input.name] = input.value; });
+                try {
+                    await addDoc(dataCollection, newRowData);
+                    showNotification('Data baru berhasil ditambahkan.');
+                } catch (error) { showNotification('Gagal menambah data.', true); }
             }
-            else if (e.target.classList.contains('cancel-btn')) { // Untuk baris baru
-                row.remove();
-            }
+            else if (e.target.classList.contains('cancel-btn')) { row.remove(); }
         });
-
-        // Inisialisasi
-        function initialize() {
-            const savedData = sessionStorage.getItem('skpData');
-            const savedHeaders = sessionStorage.getItem('skpHeaders');
-            if (savedData) {
-                currentData = JSON.parse(savedData);
-                if (savedHeaders) {
-                    headers = JSON.parse(savedHeaders);
-                }
-            }
-            renderHeaders();
-            renderAllTables();
-        }
-
-        initialize();
-    });
     </script>
 </body>
 </html>
