@@ -40,7 +40,7 @@
             <p>Notifikasi</p>
         </div>
 
-        <!-- Modal Kata Sandi (Tidak ada perubahan) -->
+        <!-- Modal Kata Sandi -->
         <div id="passwordModal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal-backdrop">
             <div class="modal bg-white rounded-lg shadow-xl w-full max-w-sm p-6" style="transform: scale(0.95); opacity: 0;">
                 <h3 class="text-xl font-semibold mb-4 text-gray-700">Akses Terbatas</h3>
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <!-- Header dan Navigasi (Tidak ada perubahan) -->
+        <!-- Header dan Navigasi -->
         <header class="bg-white p-4 rounded-lg shadow-md mb-6">
              <nav class="flex items-center justify-between">
                 <div class="text-lg font-bold text-gray-700">
@@ -77,7 +77,20 @@
                     <p class="text-sm text-gray-500 mt-4">Rekapitulasi ini berdasarkan hasil respon formulir di <a href="https://s.id/lapor-skp" target="_blank" class="text-blue-600 hover:underline font-bold">https://s.id/lapor-skp</a>.</p>
                     <p class="text-sm text-gray-500 mt-1">Bagi Bapak/Ibu ASN guru jika SKP Tahun 2024 masih belum muncul di SIMPEG disilakan mengisi link di atas. Jika sudah mengisi link dan ternyata pada kolom status SKP sudah dinyatakan 'Sudah Muncul' namun saat dicek di aplikasi SIMPEG masih "belum muncul", silahkan konfirmasi kembali dengan cara mengisi kembali link form di atas.</p>
                 </div>
-                <div class="mb-4">
+
+                <!-- Video Tutorial Section -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 text-center mb-4">Video Tutorial Penggunaan Aplikasi</h3>
+                    <div class="aspect-video w-full max-w-3xl mx-auto rounded-lg overflow-hidden shadow-xl ring-1 ring-gray-900/10">
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/vxz9Fz-KWRM?si=KZPFlp8e8MOJzdEp" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                     <p class="text-center text-xs text-gray-500 mt-3">
+                        Jika video tidak muncul, Anda bisa menontonnya langsung di 
+                        <a href="https://www.youtube.com/watch?v=vxz9Fz-KWRM" target="_blank" class="text-blue-600 hover:underline">YouTube</a>.
+                    </p>
+                </div>
+
+                <div class="mt-8 mb-4">
                     <input type="text" id="searchInput" placeholder="Cari data di sini (NIP, Nama, Unit Kerja, dll)..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="table-container rounded-lg border border-gray-200">
@@ -125,27 +138,25 @@
     </div>
 
     <script type="module">
-        // === PERUBAHAN: Semua kode JavaScript digabung di sini ===
-
-        // 1. Impor fungsi yang kita butuhkan dari Firebase SDK
+        // Impor fungsi yang kita butuhkan dari Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, setDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
-        // 2. Tempat untuk Konfigurasi Firebase Anda
+        // Konfigurasi Firebase Anda
         const firebaseConfig = {
-  apiKey: "AIzaSyBeLLP1N7heUvLUJuD6oXcQEpmI-mMaPes",
-  authDomain: "rekap-skp-sampang.firebaseapp.com",
-  projectId: "rekap-skp-sampang",
-  storageBucket: "rekap-skp-sampang.firebasestorage.app",
-  messagingSenderId: "10311895351",
-  appId: "1:10311895351:web:8dbaa535d011c4931c32b2"
-};
+          apiKey: "AIzaSyBeLLP1N7heUvLUJuD6oXcQEpmI-mMaPes",
+          authDomain: "rekap-skp-sampang.firebaseapp.com",
+          projectId: "rekap-skp-sampang",
+          storageBucket: "rekap-skp-sampang.firebasestorage.app",
+          messagingSenderId: "10311895351",
+          appId: "1:10311895351:web:8dbaa535d011c4931c32b2"
+        };
 
-        // 3. Inisialisasi Firebase
+        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 4. Kode aplikasi utama berjalan langsung
+        // Kode aplikasi utama
         const dataCollection = collection(db, 'skp-data');
 
         const mainView = document.getElementById('mainView');
@@ -201,7 +212,7 @@
             const headerRow = (h) => `<tr><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No.</th>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}</tr>`;
             const adminHeaderRow = (h) => `<tr><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No.</th>${h.map(header => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">${header}</th>`).join('')}<th scope="col" class="relative px-4 py-3"><span class="sr-only">Aksi</span></th></tr>`;
             
-            const displayHeaders = headers.slice(1); // Menghilangkan 'No.' dari array utama
+            const displayHeaders = headers.slice(1);
             document.getElementById('dataTableHeader').innerHTML = headerRow(displayHeaders);
             document.getElementById('adminTableHeader').innerHTML = adminHeaderRow(displayHeaders);
         }
