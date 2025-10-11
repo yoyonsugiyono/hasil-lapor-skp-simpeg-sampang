@@ -315,13 +315,13 @@
                     let updateText;
                     if (docSnap.exists() && docSnap.data().lastUpdated) {
                         const timestamp = docSnap.data().lastUpdated.toDate();
-                        const formattedDate = timestamp.toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
+                        const formattedDate = timestamp.toLocaleString('id-ID', {
+                            weekday: 'long',
                             year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
+                            minute: '2-digit'
                         });
                         updateText = `Data terakhir diperbarui: ${formattedDate} WIB`;
                     } else {
