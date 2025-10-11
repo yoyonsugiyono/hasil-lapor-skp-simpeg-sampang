@@ -297,14 +297,14 @@
                     currentData = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
                     currentData.sort((a, b) => (a.data['Nama ASN'] || '').localeCompare(b.data['Nama ASN'] || ''));
                     
-                    if (currentData.length > 0 && !headers.includes('Nama ASN')) { // Check to avoid re-calculating headers unnecessarily
+                    if (currentData.length > 0 && !headers.includes('Nama ASN')) { 
                        const firstItemHeaders = Object.keys(currentData[0].data);
                        const desiredOrder = ['NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
                        const sortedHeaders = desiredOrder.filter(h => firstItemHeaders.includes(h));
                        const otherHeaders = firstItemHeaders.filter(h => !desiredOrder.includes(h));
                        headers = ['No.', ...sortedHeaders, ...otherHeaders];
                        renderHeaders();
-                    } else if (headers.length <= 2) { // Initial load with no data
+                    } else if (headers.length <= 2) { 
                         renderHeaders();
                     }
                     
@@ -333,14 +333,21 @@
 
             } catch (error) {
                 console.error("Authentication or Firestore listener error:", error);
-                showNotification("Gagal memuat data: Masalah perizinan. Coba segarkan halaman.", true);
+                let errorMessage = '<p class="text-red-500">Gagal memuat data. Periksa konsol untuk detail.</p>';
+                if (error.code === 'auth/configuration-not-found') {
+                    showNotification("Error: Anonymous Sign-In belum diaktifkan di Firebase.", true);
+                    errorMessage = '<p class="text-red-500 text-center px-4">Gagal memuat data. <br><b>Aksi yang diperlukan:</b> Aktifkan "Anonymous" sebagai metode Sign-in di Firebase Authentication Console Anda.</p>';
+                } else {
+                    showNotification("Gagal memuat data: Masalah perizinan. Coba segarkan halaman.", true);
+                }
+
                 const loadingIndicator = document.querySelector('#dataTableBody tr td');
                 if(loadingIndicator) {
-                    loadingIndicator.innerHTML = '<p class="text-red-500">Gagal memuat data. Periksa konsol untuk detail.</p>';
+                    loadingIndicator.innerHTML = errorMessage;
                 }
                 const adminLoadingIndicator = document.querySelector('#adminTableBody tr td');
                 if(adminLoadingIndicator) {
-                    adminLoadingIndicator.innerHTML = '<p class="text-red-500">Gagal memuat data. Periksa konsol untuk detail.</p>';
+                    adminLoadingIndicator.innerHTML = errorMessage;
                 }
             }
         }
