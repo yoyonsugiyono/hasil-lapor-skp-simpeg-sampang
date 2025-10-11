@@ -142,6 +142,7 @@
     <script type="module">
         // Impor fungsi yang kita butuhkan dari Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, setDoc, deleteDoc, doc, writeBatch, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         // Konfigurasi Firebase Anda
@@ -157,10 +158,11 @@
         // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // Kode aplikasi utama
         const dataCollection = collection(db, 'skp-data');
-        const metadataDocRef = doc(db, 'metadata', 'app-status'); // Reference to a single metadata document
+        const metadataDocRef = doc(db, 'metadata', 'app-status');
 
         const mainView = document.getElementById('mainView');
         const adminView = document.getElementById('adminView');
@@ -178,7 +180,7 @@
         const searchInput = document.getElementById('searchInput');
         const dataTableBody = document.getElementById('dataTableBody');
         const adminTableBody = document.getElementById('adminTableBody');
-        const lastUpdateInfo = document.getElementById('lastUpdateInfo'); // New element for last update info
+        const lastUpdateInfo = document.getElementById('lastUpdateInfo');
         const lastUpdateInfoTable = document.getElementById('lastUpdateInfoTable');
 
         let currentData = [];
@@ -277,7 +279,6 @@
             renderAdminTable(currentData);
         }
 
-        // Function to update the last updated timestamp in Firestore
         async function updateLastUpdatedTimestamp() {
             try {
                 await setDoc(metadataDocRef, { lastUpdated: serverTimestamp() }, { merge: true });
@@ -287,44 +288,68 @@
             }
         }
 
-        // Listen for changes in skp-data and metadata
-        onSnapshot(dataCollection, (snapshot) => {
-            currentData = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-            currentData.sort((a, b) => (a.data['Nama ASN'] || '').localeCompare(b.data['Nama ASN'] || ''));
-            
-            if (currentData.length > 0) {
-               const firstItemHeaders = Object.keys(currentData[0].data);
-               const desiredOrder = ['NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
-               const sortedHeaders = desiredOrder.filter(h => firstItemHeaders.includes(h));
-               const otherHeaders = firstItemHeaders.filter(h => !desiredOrder.includes(h));
-               headers = ['No.', ...sortedHeaders, ...otherHeaders];
-            }
-            
-            renderHeaders();
-            renderAllTables();
-        });
+        async function initializeAppAndListeners() {
+            try {
+                await signInAnonymously(auth);
+                console.log('User signed in anonymously');
 
-        onSnapshot(metadataDocRef, (docSnap) => {
-            let updateText;
-            if (docSnap.exists() && docSnap.data().lastUpdated) {
-                const timestamp = docSnap.data().lastUpdated.toDate();
-                const formattedDate = timestamp.toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
+                onSnapshot(dataCollection, (snapshot) => {
+                    currentData = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                    currentData.sort((a, b) => (a.data['Nama ASN'] || '').localeCompare(b.data['Nama ASN'] || ''));
+                    
+                    if (currentData.length > 0 && !headers.includes('Nama ASN')) { // Check to avoid re-calculating headers unnecessarily
+                       const firstItemHeaders = Object.keys(currentData[0].data);
+                       const desiredOrder = ['NIP/NIPPPK', 'Nama ASN', 'Unit Kerja', 'Status SKP di SIMPEG', 'Keterangan'];
+                       const sortedHeaders = desiredOrder.filter(h => firstItemHeaders.includes(h));
+                       const otherHeaders = firstItemHeaders.filter(h => !desiredOrder.includes(h));
+                       headers = ['No.', ...sortedHeaders, ...otherHeaders];
+                       renderHeaders();
+                    } else if (headers.length <= 2) { // Initial load with no data
+                        renderHeaders();
+                    }
+                    
+                    renderAllTables();
                 });
-                updateText = `Data terakhir diperbarui: ${formattedDate} WIB`;
-            } else {
-                updateText = 'Data terakhir diperbarui: Belum ada informasi';
+
+                onSnapshot(metadataDocRef, (docSnap) => {
+                    let updateText;
+                    if (docSnap.exists() && docSnap.data().lastUpdated) {
+                        const timestamp = docSnap.data().lastUpdated.toDate();
+                        const formattedDate = timestamp.toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                        updateText = `Data terakhir diperbarui: ${formattedDate} WIB`;
+                    } else {
+                        updateText = 'Data terakhir diperbarui: Belum ada informasi';
+                    }
+                    lastUpdateInfo.textContent = updateText;
+                    lastUpdateInfoTable.textContent = updateText;
+                });
+
+            } catch (error) {
+                console.error("Authentication or Firestore listener error:", error);
+                showNotification("Gagal memuat data: Masalah perizinan. Coba segarkan halaman.", true);
+                const loadingIndicator = document.querySelector('#dataTableBody tr td');
+                if(loadingIndicator) {
+                    loadingIndicator.innerHTML = '<p class="text-red-500">Gagal memuat data. Periksa konsol untuk detail.</p>';
+                }
+                const adminLoadingIndicator = document.querySelector('#adminTableBody tr td');
+                if(adminLoadingIndicator) {
+                    adminLoadingIndicator.innerHTML = '<p class="text-red-500">Gagal memuat data. Periksa konsol untuk detail.</p>';
+                }
             }
-            lastUpdateInfo.textContent = updateText;
-            lastUpdateInfoTable.textContent = updateText;
-        });
+        }
+
+        // Initialize App
+        initializeAppAndListeners();
 
 
+        // UI Event Listeners
         mainViewBtn.addEventListener('click', () => switchView('main'));
         adminViewBtn.addEventListener('click', () => {
             passwordModal.classList.remove('hidden');
@@ -378,7 +403,7 @@
                         });
                         await batchAdd.commit();
                         
-                        await updateLastUpdatedTimestamp(); // Update timestamp after successful import
+                        await updateLastUpdatedTimestamp();
                         showNotification('Semua data berhasil diganti dengan data dari file!');
                         switchView('main');
                     } else {
@@ -430,7 +455,7 @@
                 row.querySelectorAll('input[name]').forEach(input => { updatedRowData[input.name] = input.value; });
                 try {
                     await setDoc(doc(db, 'skp-data', docId), updatedRowData);
-                    await updateLastUpdatedTimestamp(); // Update timestamp after manual edit
+                    await updateLastUpdatedTimestamp();
                     showNotification('Data berhasil diperbarui.');
                 } catch (error) { showNotification('Gagal memperbarui data.', true); }
             }
@@ -438,17 +463,17 @@
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     try {
                         await deleteDoc(doc(db, 'skp-data', docId));
-                        await updateLastUpdatedTimestamp(); // Update timestamp after manual delete
+                        await updateLastUpdatedTimestamp();
                         showNotification('Data berhasil dihapus.');
                     } catch (error) { showNotification('Gagal menghapus data.', true); }
                 }
             }
-            else if (e.target.classList.contains('save-btn')) { // Untuk baris baru
+            else if (e.target.classList.contains('save-btn')) {
                 const newRowData = {};
                 row.querySelectorAll('input[name]').forEach(input => { newRowData[input.name] = input.value; });
                 try {
                     await addDoc(dataCollection, newRowData);
-                    await updateLastUpdatedTimestamp(); // Update timestamp after manual add
+                    await updateLastUpdatedTimestamp();
                     showNotification('Data baru berhasil ditambahkan.');
                 } catch (error) { showNotification('Gagal menambah data.', true); }
             }
