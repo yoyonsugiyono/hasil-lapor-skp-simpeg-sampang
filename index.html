@@ -207,7 +207,7 @@
             notification.classList.toggle('bg-green-500', !isError);
             setTimeout(() => {
                 notification.classList.add('hidden');
-            }, 3000);
+            }, 4000); // Durasi notifikasi lebih lama agar mudah dibaca
         }
 
         function switchView(view) {
@@ -302,6 +302,11 @@
                 console.log("Last updated timestamp successfully updated.");
             } catch (error) {
                 console.error("Error updating last updated timestamp: ", error);
+                 if (error.code === 'permission-denied') {
+                    showNotification('Gagal update waktu: Hak akses ditolak. Periksa Aturan Keamanan Firestore Anda.', true);
+                } else {
+                    showNotification('Gagal memperbarui waktu otomatis.', true);
+                }
             }
         }
 
@@ -526,9 +531,14 @@
                 manualUpdateInput.value = '';
             } catch (error) {
                 console.error("Error saving manual update time: ", error);
-                showNotification('Gagal menyimpan waktu pembaruan.', true);
+                if (error.code === 'permission-denied') {
+                    showNotification('Gagal: Hak akses ditolak. Periksa Aturan Keamanan Firestore Anda.', true);
+                } else {
+                    showNotification('Gagal menyimpan waktu pembaruan.', true);
+                }
             }
         });
     </script>
 </body>
 </html>
+
